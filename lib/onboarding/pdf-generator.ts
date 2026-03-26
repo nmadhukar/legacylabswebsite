@@ -1,13 +1,4 @@
-import PDFDocument from "pdfkit"
-
-// Brand colors
-const ORANGE = "#D35400"
-const DARK_BROWN = "#3E2723"
-const CHARCOAL = "#2B2F33"
-const SLATE = "#4B5563"
-const LIGHT_BG = "#FDF2E9"
-const BORDER = "#E5E7EB"
-const GREEN = "#27ae60"
+import { jsPDF } from "jspdf"
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "N/A"
@@ -26,291 +17,264 @@ export async function generateOnboardingPdf(
   data: Record<string, any>,
   submissionId: string
 ): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []
-    const doc = new PDFDocument({
-      size: "LETTER",
-      margins: { top: 50, bottom: 50, left: 50, right: 50 },
-      info: {
-        Title: `Legacy Labs Onboarding - ${data.facilityLegalName}`,
-        Author: "Legacy Laboratories",
-        Subject: `Onboarding Form ${submissionId}`,
-      },
-    })
+  const doc = new jsPDF({ unit: "pt", format: "letter" })
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const margin = 50
+  const contentW = pageW - margin * 2
+  let y = 0
 
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk))
-    doc.on("end", () => resolve(Buffer.concat(chunks)))
-    doc.on("error", reject)
-
-    const pageWidth = doc.page.width - 100 // margins
-    const leftCol = 50
-    const rightCol = pageWidth + 50
-
-    // ---- Helper functions ----
-    function drawHeader() {
-      // Orange top bar
-      doc.rect(0, 0, doc.page.width, 8).fill(ORANGE)
-
-      // Title
-      doc.fontSize(24).font("Helvetica-Bold").fillColor(DARK_BROWN)
-        .text("LEGACY", leftCol, 30, { continued: true })
-      doc.fontSize(24).fillColor(ORANGE).text(" LABORATORIES")
-
-      doc.fontSize(14).font("Helvetica-Bold").fillColor(CHARCOAL)
-        .text("New Client Onboarding Form", leftCol, 60)
-
-      doc.fontSize(9).font("Helvetica").fillColor(SLATE)
-        .text(`Submission ID: ${submissionId}  |  Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, leftCol, 78)
-
-      // Divider
-      doc.moveTo(leftCol, 95).lineTo(rightCol, 95).strokeColor(ORANGE).lineWidth(2).stroke()
-      doc.y = 105
+  function checkPage(needed: number) {
+    if (y + needed > pageH - 60) {
+      doc.addPage()
+      // continuation header
+      doc.setFontSize(7).setTextColor(100)
+      doc.text(`Legacy Laboratories — Onboarding ${submissionId}`, margin, 30)
+      doc.setDrawColor(220).setLineWidth(0.5).line(margin, 38, pageW - margin, 38)
+      y = 50
     }
+  }
 
-    function sectionTitle(title: string) {
-      checkPageBreak(40)
-      const y = doc.y + 10
-      doc.rect(leftCol, y, pageWidth, 22).fill(LIGHT_BG)
-      doc.fontSize(11).font("Helvetica-Bold").fillColor(ORANGE)
-        .text(title.toUpperCase(), leftCol + 8, y + 5)
-      doc.y = y + 30
-    }
+  function sectionTitle(title: string) {
+    checkPage(35)
+    y += 14
+    doc.setFillColor(253, 242, 233)
+    doc.rect(margin, y - 12, contentW, 20, "F")
+    doc.setFontSize(10).setFont("helvetica", "bold").setTextColor(211, 84, 0)
+    doc.text(title.toUpperCase(), margin + 8, y + 2)
+    y += 18
+  }
 
-    function fieldRow(label: string, value: string | undefined | null, opts?: { indent?: number }) {
-      checkPageBreak(18)
-      const indent = opts?.indent || 0
-      const y = doc.y
-      doc.fontSize(9).font("Helvetica-Bold").fillColor(SLATE)
-        .text(label, leftCol + indent, y, { width: 180 })
-      doc.fontSize(9).font("Helvetica").fillColor(CHARCOAL)
-        .text(value || "N/A", leftCol + 190 + indent, y, { width: pageWidth - 190 - indent })
-      doc.y = Math.max(doc.y, y + 16)
-    }
+  function fieldRow(label: string, value: string | undefined | null) {
+    checkPage(16)
+    doc.setFontSize(9).setFont("helvetica", "bold").setTextColor(75, 85, 99)
+    doc.text(label, margin + 4, y)
+    doc.setFont("helvetica", "normal").setTextColor(43, 47, 51)
+    const val = value || "N/A"
+    const lines = doc.splitTextToSize(val, contentW - 195)
+    doc.text(lines, margin + 190, y)
+    y += Math.max(14, lines.length * 12)
+  }
 
-    function badgeRow(label: string, badges: string[]) {
-      checkPageBreak(18)
-      const y = doc.y
-      doc.fontSize(9).font("Helvetica-Bold").fillColor(SLATE)
-        .text(label, leftCol, y, { width: 180 })
-      doc.fontSize(9).font("Helvetica").fillColor(CHARCOAL)
-        .text(badges.length > 0 ? badges.join("  •  ") : "None selected", leftCol + 190, y, { width: pageWidth - 190 })
-      doc.y = Math.max(doc.y, y + 16)
-    }
+  function badgeRow(label: string, items: string[]) {
+    checkPage(16)
+    doc.setFontSize(9).setFont("helvetica", "bold").setTextColor(75, 85, 99)
+    doc.text(label, margin + 4, y)
+    doc.setFont("helvetica", "normal").setTextColor(43, 47, 51)
+    doc.text(items.length > 0 ? items.join("  |  ") : "None selected", margin + 190, y)
+    y += 14
+  }
 
-    function checkPageBreak(needed: number) {
-      if (doc.y + needed > doc.page.height - 60) {
-        doc.addPage()
-        // Small header on continuation pages
-        doc.fontSize(8).font("Helvetica").fillColor(SLATE)
-          .text(`Legacy Laboratories — Onboarding ${submissionId}`, leftCol, 30)
-        doc.moveTo(leftCol, 42).lineTo(rightCol, 42).strokeColor(BORDER).lineWidth(0.5).stroke()
-        doc.y = 50
-      }
-    }
+  function thinLine() {
+    checkPage(10)
+    y += 4
+    doc.setDrawColor(229, 231, 235).setLineWidth(0.5).line(margin, y, pageW - margin, y)
+    y += 8
+  }
 
-    function thinDivider() {
-      checkPageBreak(12)
-      const y = doc.y + 4
-      doc.moveTo(leftCol, y).lineTo(rightCol, y).strokeColor(BORDER).lineWidth(0.5).stroke()
-      doc.y = y + 8
-    }
+  // ===== HEADER =====
+  doc.setFillColor(211, 84, 0).rect(0, 0, pageW, 6, "F")
 
-    // ---- BUILD PDF ----
-    drawHeader()
+  doc.setFontSize(22).setFont("helvetica", "bold").setTextColor(62, 39, 35)
+  doc.text("LEGACY", margin, 35)
+  doc.setTextColor(211, 84, 0)
+  doc.text("LABORATORIES", margin + 95, 35)
 
-    // ===== SECTION 1: ACCOUNT INFORMATION =====
-    sectionTitle("1. Account Information")
-    fieldRow("Facility Legal Name:", data.facilityLegalName)
-    if (data.dba) fieldRow("DBA:", data.dba)
-    fieldRow("Projected Start Date:", formatDate(data.projectedStartDate))
-    thinDivider()
-    fieldRow("Address Line 1:", data.addressLine1)
-    if (data.addressLine2) fieldRow("Address Line 2:", data.addressLine2)
-    fieldRow("City:", data.city)
-    fieldRow("State:", data.state)
-    fieldRow("ZIP Code:", data.zip)
+  doc.setFontSize(13).setFont("helvetica", "bold").setTextColor(43, 47, 51)
+  doc.text("New Client Onboarding Form", margin, 55)
 
-    // ===== SECTION 2: CONTACTS =====
-    sectionTitle("2. Primary Contact")
-    fieldRow("Name:", data.primaryContactName)
-    fieldRow("Role:", data.primaryContactRole)
-    fieldRow("Phone:", data.primaryContactPhone)
-    fieldRow("Email:", data.primaryContactEmail)
+  doc.setFontSize(8).setFont("helvetica", "normal").setTextColor(100)
+  doc.text(
+    `Submission ID: ${submissionId}  |  Date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+    margin, 70
+  )
 
-    thinDivider()
-    checkPageBreak(20)
-    doc.fontSize(10).font("Helvetica-Bold").fillColor(CHARCOAL)
-      .text("Escalation / Critical Contact", leftCol, doc.y)
-    doc.y += 6
-    fieldRow("Name:", data.escalationContactName)
-    fieldRow("After-Hours Phone:", data.escalationContactPhone)
-    if (data.escalationContactEmail) fieldRow("Email:", data.escalationContactEmail)
+  doc.setDrawColor(211, 84, 0).setLineWidth(2).line(margin, 80, pageW - margin, 80)
+  y = 95
 
-    // ===== SECTION 3: BUSINESS HOURS =====
-    sectionTitle("3. Business Hours")
-    const bh = data.businessHours || {}
-    const days = [
-      { day: "Monday", start: bh.mondayStart, end: bh.mondayEnd },
-      { day: "Tuesday", start: bh.tuesdayStart, end: bh.tuesdayEnd },
-      { day: "Wednesday", start: bh.wednesdayStart, end: bh.wednesdayEnd },
-      { day: "Thursday", start: bh.thursdayStart, end: bh.thursdayEnd },
-      { day: "Friday", start: bh.fridayStart, end: bh.fridayEnd },
-    ]
+  // ===== 1. ACCOUNT =====
+  sectionTitle("1. Account Information")
+  fieldRow("Facility Legal Name:", data.facilityLegalName)
+  if (data.dba) fieldRow("DBA:", data.dba)
+  fieldRow("Projected Start Date:", formatDate(data.projectedStartDate))
+  thinLine()
+  fieldRow("Address Line 1:", data.addressLine1)
+  if (data.addressLine2) fieldRow("Address Line 2:", data.addressLine2)
+  fieldRow("City:", data.city)
+  fieldRow("State:", data.state)
+  fieldRow("ZIP Code:", data.zip)
 
-    // Table header
-    checkPageBreak(20 + days.length * 16)
-    let ty = doc.y
-    doc.rect(leftCol, ty, pageWidth, 16).fill(LIGHT_BG)
-    doc.fontSize(8).font("Helvetica-Bold").fillColor(ORANGE)
-    doc.text("DAY", leftCol + 8, ty + 4, { width: 120 })
-    doc.text("START", leftCol + 140, ty + 4, { width: 100 })
-    doc.text("END", leftCol + 280, ty + 4, { width: 100 })
-    ty += 18
+  // ===== 2. CONTACTS =====
+  sectionTitle("2. Primary Contact")
+  fieldRow("Name:", data.primaryContactName)
+  fieldRow("Role:", data.primaryContactRole)
+  fieldRow("Phone:", data.primaryContactPhone)
+  fieldRow("Email:", data.primaryContactEmail)
+  thinLine()
 
-    days.forEach((d) => {
-      doc.fontSize(9).font("Helvetica").fillColor(CHARCOAL)
-      doc.text(d.day, leftCol + 8, ty, { width: 120 })
-      doc.text(d.start || "N/A", leftCol + 140, ty, { width: 100 })
-      doc.text(d.end || "N/A", leftCol + 280, ty, { width: 100 })
-      ty += 16
-    })
-    doc.y = ty + 4
-    fieldRow("After-Hours Coverage:", data.afterHoursCoverage ? "Yes" : "No")
+  checkPage(16)
+  doc.setFontSize(10).setFont("helvetica", "bold").setTextColor(43, 47, 51)
+  doc.text("Escalation / Critical Contact", margin + 4, y)
+  y += 14
+  fieldRow("Name:", data.escalationContactName)
+  fieldRow("After-Hours Phone:", data.escalationContactPhone)
+  if (data.escalationContactEmail) fieldRow("Email:", data.escalationContactEmail)
 
-    // ===== SECTION 4: SHIPPING & LOGISTICS =====
-    sectionTitle("4. Shipping & Logistics")
-    const shippingLabel = data.shippingProvider === "other"
-      ? (data.shippingProviderOther || "Other")
-      : (data.shippingProvider || "N/A").toUpperCase()
-    fieldRow("Shipping Provider:", shippingLabel)
+  // ===== 3. BUSINESS HOURS =====
+  sectionTitle("3. Business Hours")
+  const bh = data.businessHours || {}
+  const days = [
+    { day: "Monday", s: bh.mondayStart, e: bh.mondayEnd },
+    { day: "Tuesday", s: bh.tuesdayStart, e: bh.tuesdayEnd },
+    { day: "Wednesday", s: bh.wednesdayStart, e: bh.wednesdayEnd },
+    { day: "Thursday", s: bh.thursdayStart, e: bh.thursdayEnd },
+    { day: "Friday", s: bh.fridayStart, e: bh.fridayEnd },
+  ]
 
-    const courierLabel = data.courierPickupNeeded === "yes" ? "Yes"
-      : data.courierPickupNeeded === "no" ? "No" : "Not sure yet"
-    fieldRow("Courier Pickup Needed:", courierLabel)
+  checkPage(20 + days.length * 15)
+  // Table header
+  doc.setFillColor(253, 242, 233)
+  doc.rect(margin, y - 10, contentW, 15, "F")
+  doc.setFontSize(7).setFont("helvetica", "bold").setTextColor(211, 84, 0)
+  doc.text("DAY", margin + 8, y)
+  doc.text("START", margin + 140, y)
+  doc.text("END", margin + 280, y)
+  y += 12
 
-    if (data.courierPickupNeeded === "yes") {
-      fieldRow("Pickup Window:", data.courierPickupWindow, { indent: 10 })
-      fieldRow("Pickup Start Date:", formatDate(data.courierPickupStartDate), { indent: 10 })
-    }
-
-    fieldRow("Collection Supplies Needed:", data.suppliesNeeded ? "Yes" : "No")
-    if (data.suppliesNotes) fieldRow("Supply Notes:", data.suppliesNotes)
-
-    // ===== SECTION 5: RESULT DELIVERY =====
-    sectionTitle("5. Result Delivery & Integrations")
-    const deliveryMethods: string[] = []
-    if (data.portalEnabled) deliveryMethods.push("Secure Portal")
-    if (data.hl7Enabled) deliveryMethods.push("HL7 v2")
-    if (data.fhirEnabled) deliveryMethods.push("FHIR API")
-    if (data.sftpEnabled) deliveryMethods.push("SFTP")
-    if (data.faxEnabled) deliveryMethods.push("Fax")
-    if (data.emailResultsEnabled) deliveryMethods.push("Email")
-    badgeRow("Delivery Methods:", deliveryMethods)
-
-    if (data.faxEnabled && data.faxNumber) fieldRow("Fax Number:", data.faxNumber)
-    if (data.emailResultsEnabled && data.resultsEmail) fieldRow("Results Email:", data.resultsEmail)
-    if (data.alertsEmail) fieldRow("Alerts Email:", data.alertsEmail)
-    if (data.requestedEmr) fieldRow("Requested EMR/EHR:", data.requestedEmr)
-
-    // ===== SECTION 6: SERVICES =====
-    sectionTitle("6. Requested Services")
-    const services: string[] = []
-    if (data.sampleTypeToxicology) services.push("Toxicology")
-    if (data.sampleTypeBloodSerum) services.push("Blood / Serum")
-    if (data.sampleTypeInfectiousDisease) services.push("Infectious Disease")
-    if (data.sampleTypeClinicalChemistry) services.push("Clinical Chemistry")
-    if (data.sampleTypeOther) services.push("Other")
-    badgeRow("Sample Types:", services)
-    if (data.sampleTypeOther && data.sampleTypeOtherText) {
-      fieldRow("Other Details:", data.sampleTypeOtherText)
-    }
-
-    // ===== SECTION 7: PROVIDERS =====
-    sectionTitle("7. Ordering Providers")
-    const providers = (data.providers || []) as Array<{
-      name: string; npi: string; credentials: string; email: string; phone?: string
-    }>
-
-    if (providers.length === 0) {
-      doc.fontSize(9).font("Helvetica").fillColor(SLATE)
-        .text("No providers listed", leftCol, doc.y)
-      doc.y += 16
-    } else {
-      // Table
-      checkPageBreak(20 + providers.length * 18)
-      let py = doc.y
-      doc.rect(leftCol, py, pageWidth, 16).fill(LIGHT_BG)
-      doc.fontSize(7).font("Helvetica-Bold").fillColor(ORANGE)
-      doc.text("NAME", leftCol + 4, py + 4, { width: 120 })
-      doc.text("NPI", leftCol + 130, py + 4, { width: 80 })
-      doc.text("CREDENTIALS", leftCol + 215, py + 4, { width: 70 })
-      doc.text("EMAIL", leftCol + 290, py + 4, { width: 130 })
-      doc.text("PHONE", leftCol + 425, py + 4, { width: 80 })
-      py += 18
-
-      providers.forEach((p, i) => {
-        checkPageBreak(18)
-        if (i % 2 === 1) {
-          doc.rect(leftCol, py - 1, pageWidth, 16).fill("#FAFAFA")
-        }
-        doc.fontSize(8).font("Helvetica").fillColor(CHARCOAL)
-        doc.text(p.name || "", leftCol + 4, py, { width: 120 })
-        doc.text(p.npi || "", leftCol + 130, py, { width: 80 })
-        doc.text(p.credentials || "", leftCol + 215, py, { width: 70 })
-        doc.text(p.email || "", leftCol + 290, py, { width: 130 })
-        doc.text(p.phone || "—", leftCol + 425, py, { width: 80 })
-        py += 18
-      })
-      doc.y = py + 4
-    }
-    fieldRow("Total Providers:", String(providers.length))
-
-    // ===== SECTION 8: AUTHORIZATION =====
-    sectionTitle("8. Authorization & Acknowledgement")
-    fieldRow("Provider Acknowledgement:", data.providerAcknowledgement ? "Accepted" : "Not accepted")
-
-    const esigLabel = data.electronicSignatureAuth === "authorize" ? "Authorized"
-      : data.electronicSignatureAuth === "do-not-authorize" ? "Not Authorized"
-      : "Not specified"
-    fieldRow("Electronic Signature Auth:", esigLabel)
-
-    fieldRow("COC Testing Requested:", data.cocTestingRequested ? "Yes" : "No")
-    if (data.cocTestingRequested) {
-      fieldRow("COC Rider Acknowledged:", data.cocRiderAcknowledgement ? "Accepted" : "Not accepted", { indent: 10 })
-    }
-
-    thinDivider()
-
-    // Signature block
-    checkPageBreak(90)
-    doc.rect(leftCol, doc.y, pageWidth, 80).lineWidth(1).strokeColor(BORDER).stroke()
-    const sigY = doc.y + 8
-    doc.fontSize(10).font("Helvetica-Bold").fillColor(CHARCOAL)
-      .text("Authorized Representative", leftCol + 10, sigY)
-    doc.y = sigY + 18
-    fieldRow("Name:", data.authorizedRepName)
-    fieldRow("Title:", data.authorizedRepTitle)
-
-    // Signature lines
-    const lineY = doc.y + 20
-    doc.moveTo(leftCol + 10, lineY).lineTo(leftCol + 240, lineY).strokeColor(CHARCOAL).lineWidth(0.5).stroke()
-    doc.fontSize(7).font("Helvetica").fillColor(SLATE).text("Signature", leftCol + 10, lineY + 3)
-
-    doc.moveTo(leftCol + 280, lineY).lineTo(rightCol - 10, lineY).strokeColor(CHARCOAL).lineWidth(0.5).stroke()
-    doc.text("Date", leftCol + 280, lineY + 3)
-
-    doc.y = lineY + 20
-
-    // ---- FOOTER ----
-    checkPageBreak(40)
-    doc.y += 10
-    doc.moveTo(leftCol, doc.y).lineTo(rightCol, doc.y).strokeColor(ORANGE).lineWidth(1).stroke()
-    doc.y += 8
-    doc.fontSize(7).font("Helvetica").fillColor(SLATE)
-      .text("Legacy Laboratories  •  CAP-Accredited Clinical Reference Laboratory  •  legacyclinicallabs.com", leftCol, doc.y, { align: "center", width: pageWidth })
-    doc.y += 10
-    doc.text(`This document was generated automatically upon form submission. Submission ID: ${submissionId}`, leftCol, doc.y, { align: "center", width: pageWidth })
-
-    doc.end()
+  doc.setFontSize(9).setFont("helvetica", "normal").setTextColor(43, 47, 51)
+  days.forEach((d) => {
+    doc.text(d.day, margin + 8, y)
+    doc.text(d.s || "N/A", margin + 140, y)
+    doc.text(d.e || "N/A", margin + 280, y)
+    y += 14
   })
+  y += 2
+  fieldRow("After-Hours Coverage:", data.afterHoursCoverage ? "Yes" : "No")
+
+  // ===== 4. SHIPPING =====
+  sectionTitle("4. Shipping & Logistics")
+  const shipLabel = data.shippingProvider === "other"
+    ? (data.shippingProviderOther || "Other")
+    : (data.shippingProvider || "N/A").toUpperCase()
+  fieldRow("Shipping Provider:", shipLabel)
+
+  const courierLabel = data.courierPickupNeeded === "yes" ? "Yes"
+    : data.courierPickupNeeded === "no" ? "No" : "Not sure yet"
+  fieldRow("Courier Pickup Needed:", courierLabel)
+  if (data.courierPickupNeeded === "yes") {
+    fieldRow("Pickup Window:", data.courierPickupWindow)
+    fieldRow("Pickup Start Date:", formatDate(data.courierPickupStartDate))
+  }
+  fieldRow("Collection Supplies Needed:", data.suppliesNeeded ? "Yes" : "No")
+  if (data.suppliesNotes) fieldRow("Supply Notes:", data.suppliesNotes)
+
+  // ===== 5. RESULT DELIVERY =====
+  sectionTitle("5. Result Delivery & Integrations")
+  const methods: string[] = []
+  if (data.portalEnabled) methods.push("Secure Portal")
+  if (data.hl7Enabled) methods.push("HL7 v2")
+  if (data.fhirEnabled) methods.push("FHIR API")
+  if (data.sftpEnabled) methods.push("SFTP")
+  if (data.faxEnabled) methods.push("Fax")
+  if (data.emailResultsEnabled) methods.push("Email")
+  badgeRow("Delivery Methods:", methods)
+  if (data.faxEnabled && data.faxNumber) fieldRow("Fax Number:", data.faxNumber)
+  if (data.emailResultsEnabled && data.resultsEmail) fieldRow("Results Email:", data.resultsEmail)
+  if (data.alertsEmail) fieldRow("Alerts Email:", data.alertsEmail)
+  if (data.requestedEmr) fieldRow("Requested EMR/EHR:", data.requestedEmr)
+
+  // ===== 6. SERVICES =====
+  sectionTitle("6. Requested Services")
+  const services: string[] = []
+  if (data.sampleTypeToxicology) services.push("Toxicology")
+  if (data.sampleTypeBloodSerum) services.push("Blood / Serum")
+  if (data.sampleTypeInfectiousDisease) services.push("Infectious Disease")
+  if (data.sampleTypeClinicalChemistry) services.push("Clinical Chemistry")
+  if (data.sampleTypeOther) services.push("Other")
+  badgeRow("Sample Types:", services)
+  if (data.sampleTypeOther && data.sampleTypeOtherText) fieldRow("Other Details:", data.sampleTypeOtherText)
+
+  // ===== 7. PROVIDERS =====
+  sectionTitle("7. Ordering Providers")
+  const providers = (data.providers || []) as Array<{
+    name: string; npi: string; credentials: string; email: string; phone?: string
+  }>
+
+  if (providers.length === 0) {
+    doc.setFontSize(9).setFont("helvetica", "normal").setTextColor(100)
+    doc.text("No providers listed", margin + 4, y)
+    y += 14
+  } else {
+    checkPage(20 + providers.length * 16)
+    // header
+    doc.setFillColor(253, 242, 233)
+    doc.rect(margin, y - 10, contentW, 15, "F")
+    doc.setFontSize(7).setFont("helvetica", "bold").setTextColor(211, 84, 0)
+    doc.text("NAME", margin + 4, y)
+    doc.text("NPI", margin + 130, y)
+    doc.text("CRED", margin + 215, y)
+    doc.text("EMAIL", margin + 270, y)
+    doc.text("PHONE", margin + 420, y)
+    y += 14
+
+    doc.setFontSize(8).setFont("helvetica", "normal").setTextColor(43, 47, 51)
+    providers.forEach((p) => {
+      checkPage(16)
+      doc.text(p.name || "", margin + 4, y)
+      doc.text(p.npi || "", margin + 130, y)
+      doc.text(p.credentials || "", margin + 215, y)
+      doc.text(p.email || "", margin + 270, y)
+      doc.text(p.phone || "—", margin + 420, y)
+      y += 15
+    })
+    y += 2
+  }
+  fieldRow("Total Providers:", String(providers.length))
+
+  // ===== 8. AUTHORIZATION =====
+  sectionTitle("8. Authorization & Acknowledgement")
+  fieldRow("Provider Acknowledgement:", data.providerAcknowledgement ? "Accepted" : "Not accepted")
+
+  const esig = data.electronicSignatureAuth === "authorize" ? "Authorized"
+    : data.electronicSignatureAuth === "do-not-authorize" ? "Not Authorized" : "Not specified"
+  fieldRow("Electronic Signature Auth:", esig)
+  fieldRow("COC Testing Requested:", data.cocTestingRequested ? "Yes" : "No")
+  if (data.cocTestingRequested) {
+    fieldRow("COC Rider Acknowledged:", data.cocRiderAcknowledgement ? "Accepted" : "Not accepted")
+  }
+  thinLine()
+
+  // Signature block
+  checkPage(80)
+  doc.setDrawColor(229, 231, 235).setLineWidth(1)
+  doc.rect(margin, y, contentW, 70)
+  y += 16
+  doc.setFontSize(10).setFont("helvetica", "bold").setTextColor(43, 47, 51)
+  doc.text("Authorized Representative", margin + 10, y)
+  y += 16
+  fieldRow("Name:", data.authorizedRepName)
+  fieldRow("Title:", data.authorizedRepTitle)
+
+  y += 10
+  doc.setDrawColor(43, 47, 51).setLineWidth(0.5)
+  doc.line(margin + 10, y, margin + 230, y)
+  doc.line(margin + 280, y, pageW - margin - 10, y)
+  y += 10
+  doc.setFontSize(7).setFont("helvetica", "normal").setTextColor(100)
+  doc.text("Signature", margin + 10, y)
+  doc.text("Date", margin + 280, y)
+
+  // Footer
+  y += 25
+  checkPage(30)
+  doc.setDrawColor(211, 84, 0).setLineWidth(1).line(margin, y, pageW - margin, y)
+  y += 12
+  doc.setFontSize(7).setFont("helvetica", "normal").setTextColor(100)
+  doc.text("Legacy Laboratories  •  CAP-Accredited Clinical Reference Laboratory  •  legacyclinicallabs.com", pageW / 2, y, { align: "center" })
+  y += 10
+  doc.text(`This document was generated automatically upon form submission. Submission ID: ${submissionId}`, pageW / 2, y, { align: "center" })
+
+  // Return as Buffer
+  const arrayBuffer = doc.output("arraybuffer")
+  return Buffer.from(arrayBuffer)
 }

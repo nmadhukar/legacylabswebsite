@@ -112,10 +112,10 @@ export async function POST(request: Request) {
       emailSent: true,
       message: "Onboarding request submitted successfully. A PDF copy has been emailed to our team.",
     })
-  } catch (error) {
-    console.error("[Legacy Labs] Onboarding submission error:", error)
+  } catch (error: any) {
+    console.error("[Legacy Labs] Onboarding submission error:", error?.message, error?.stack)
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: error?.message || "An unexpected error occurred" },
       { status: 500 }
     )
   }
