@@ -1,0 +1,27 @@
+http:
+  routers:
+    legacylabs-http:
+      rule: Host(`legacyclinicallabs.com`)
+      entryPoints:
+        - http
+      middlewares:
+        - redirect-to-https
+      service: legacylabs-svc
+    legacylabs-https:
+      rule: Host(`legacyclinicallabs.com`)
+      entryPoints:
+        - https
+      tls:
+        certResolver: letsencrypt
+      service: legacylabs-svc
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+  services:
+    legacylabs-svc:
+      loadBalancer:
+        servers:
+          -
+            url: 'http://10.3.104.128:3001'
