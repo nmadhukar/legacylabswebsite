@@ -4,8 +4,17 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
+      - MAILTRAP_API_KEY=e60cacbc037b62ecdd89467d4d6c4d17
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     restart: unless-stopped
+    labels:
+      - coolify.managed=true
