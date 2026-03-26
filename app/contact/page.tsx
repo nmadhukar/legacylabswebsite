@@ -23,15 +23,49 @@ import {
   Clock,
   AlertTriangle,
   ExternalLink,
+  Loader2,
 } from "lucide-react"
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [organizationType, setOrganizationType] = useState("")
+  const [inquiryType, setInquiryType] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // In production, this would submit to an API
-    setFormSubmitted(true)
+    setIsSubmitting(true)
+
+    const form = e.currentTarget
+    const formData = {
+      firstName: (form.elements.namedItem("firstName") as HTMLInputElement).value,
+      lastName: (form.elements.namedItem("lastName") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
+      organization: (form.elements.namedItem("organization") as HTMLInputElement).value,
+      organizationType,
+      inquiryType,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    }
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        setFormSubmitted(true)
+      } else {
+        alert("Submission failed. Please try again.")
+      }
+    } catch {
+      alert("An error occurred. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -44,7 +78,7 @@ export default function ContactPage() {
               Contact Us
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Have questions about our testing services or interested in establishing a 
+              Have questions about our testing services or interested in establishing a
               provider relationship? Our team is here to help.
             </p>
           </div>
@@ -140,7 +174,7 @@ export default function ContactPage() {
                 <CardHeader>
                   <CardTitle>Provider Inquiry</CardTitle>
                   <CardDescription>
-                    Complete this form for new provider inquiries. Our team will respond 
+                    Complete this form for new provider inquiries. Our team will respond
                     within 1-2 business days.
                   </CardDescription>
                 </CardHeader>
@@ -158,7 +192,7 @@ export default function ContactPage() {
                     <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
                       <h3 className="font-semibold text-foreground">Thank You</h3>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        Your inquiry has been submitted. Our team will review and respond 
+                        Your inquiry has been submitted. Our team will review and respond
                         within 1-2 business days.
                       </p>
                     </div>
@@ -167,32 +201,32 @@ export default function ContactPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="firstName">First Name *</Label>
-                          <Input id="firstName" required />
+                          <Input id="firstName" name="firstName" required />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="lastName">Last Name *</Label>
-                          <Input id="lastName" required />
+                          <Input id="lastName" name="lastName" required />
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="email">Email *</Label>
-                        <Input id="email" type="email" required />
+                        <Input id="email" name="email" type="email" required />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone</Label>
-                        <Input id="phone" type="tel" />
+                        <Input id="phone" name="phone" type="tel" />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="organization">Organization Name *</Label>
-                        <Input id="organization" required />
+                        <Input id="organization" name="organization" required />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="organizationType">Organization Type *</Label>
-                        <Select required>
+                        <Select required onValueChange={setOrganizationType}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select organization type" />
                           </SelectTrigger>
@@ -209,7 +243,7 @@ export default function ContactPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="inquiryType">Inquiry Type *</Label>
-                        <Select required>
+                        <Select required onValueChange={setInquiryType}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select inquiry type" />
                           </SelectTrigger>
@@ -227,14 +261,26 @@ export default function ContactPage() {
                         <Label htmlFor="message">Message *</Label>
                         <Textarea
                           id="message"
+                          name="message"
                           rows={4}
                           placeholder="Please describe your testing needs or questions..."
                           required
                         />
                       </div>
 
-                      <Button type="submit" className="w-full bg-primary hover:bg-[#B84500]">
-                        Submit Inquiry
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary hover:bg-[#B84500]"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Submit Inquiry"
+                        )}
                       </Button>
                     </form>
                   )}
