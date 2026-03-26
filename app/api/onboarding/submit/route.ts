@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Api-Token": process.env.MAILTRAP_API_KEY || "e60cacbc037b62ecdd89467d4d6c4d17",
+        "Api-Token": process.env.MAILTRAP_API_KEY || "dc59a58faccf414e57913e5c85428127",
       },
       body: JSON.stringify({
         from: {

@@ -8,7 +8,10 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
-      - MAILTRAP_API_KEY=e60cacbc037b62ecdd89467d4d6c4d17
+      - MAILTRAP_API_KEY=dc59a58faccf414e57913e5c85428127
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
       interval: 30s
