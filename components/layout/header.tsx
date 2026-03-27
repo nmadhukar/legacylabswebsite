@@ -19,14 +19,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
 
 const servicesItems = [
   { label: "Clinical Toxicology", href: "/toxicology", description: "Comprehensive drug screening and confirmation testing" },
@@ -110,102 +102,76 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <NavigationMenu className="hidden lg:flex">
-            <NavigationMenuList className="gap-1">
-              <NavigationMenuItem>
-                <Link href="/" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:bg-[#FDF2E9] focus:text-[#D35400] focus:outline-none">
-                    Home
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
+          <nav className="hidden items-center gap-1 lg:flex">
+            <Link
+              href="/"
+              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400]"
+            >
+              Home
+            </Link>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-base text-[#2B2F33] hover:bg-[#FDF2E9] hover:text-[#D35400] data-[state=open]:bg-[#FDF2E9]">
-                  Services
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-2 p-4">
-                    {servicesItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            href={item.href}
-                            className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FDF2E9]"
-                          >
-                            <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
-                            <p className="mt-1 line-clamp-2 text-sm text-[#4B5563]">{item.description}</p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex h-10 items-center justify-center gap-1 rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:outline-none">
+                Services <ChevronDown className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[320px]">
+                {servicesItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild className="cursor-pointer p-0">
+                    <Link href={item.href} className="block w-full px-3 py-2.5">
+                      <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
+                      <p className="mt-0.5 text-xs text-[#4B5563]">{item.description}</p>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-base text-[#2B2F33] hover:bg-[#FDF2E9] hover:text-[#D35400] data-[state=open]:bg-[#FDF2E9]">
-                  Resources
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-2 p-4">
-                    {resourcesItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            href={item.href}
-                            className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FDF2E9]"
-                          >
-                            <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
-                            <p className="mt-1 line-clamp-2 text-sm text-[#4B5563]">{item.description}</p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex h-10 items-center justify-center gap-1 rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:outline-none">
+                Resources <ChevronDown className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[320px]">
+                {resourcesItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild className="cursor-pointer p-0">
+                    <Link href={item.href} className="block w-full px-3 py-2.5">
+                      <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
+                      <p className="mt-0.5 text-xs text-[#4B5563]">{item.description}</p>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-base text-[#2B2F33] hover:bg-[#FDF2E9] hover:text-[#D35400] data-[state=open]:bg-[#FDF2E9]">
-                  For Providers
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[420px] gap-2 p-4">
-                    {providerItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            href={item.href}
-                            className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#FDF2E9]"
-                          >
-                            <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
-                            <p className="mt-1 line-clamp-2 text-sm text-[#4B5563]">{item.description}</p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex h-10 items-center justify-center gap-1 rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:outline-none">
+                For Providers <ChevronDown className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[340px]">
+                {providerItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild className="cursor-pointer p-0">
+                    <Link href={item.href} className="block w-full px-3 py-2.5">
+                      <div className="text-sm font-medium text-[#2B2F33]">{item.label}</div>
+                      <p className="mt-0.5 text-xs text-[#4B5563]">{item.description}</p>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:bg-[#FDF2E9] focus:text-[#D35400] focus:outline-none">
-                    About
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
+            <Link
+              href="/about"
+              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400]"
+            >
+              About
+            </Link>
 
-              <NavigationMenuItem>
-                <Link href="/contact" legacyBehavior passHref>
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400] focus:bg-[#FDF2E9] focus:text-[#D35400] focus:outline-none">
-                    Contact
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+            <Link
+              href="/contact"
+              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-base font-medium text-[#2B2F33] transition-colors hover:bg-[#FDF2E9] hover:text-[#D35400]"
+            >
+              Contact
+            </Link>
+          </nav>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-3 lg:flex">
