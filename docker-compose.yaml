@@ -8,7 +8,8 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
-      - MAILTRAP_API_KEY=dc59a58faccf414e57913e5c85428127
+      - SMTP_USER=coolify@dsiginc.com
+      - SMTP_PASS=5131P@stroad!
     dns:
       - 8.8.8.8
       - 1.1.1.1
