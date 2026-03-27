@@ -931,7 +931,7 @@ export default function PortalOnboardingWizardPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary hover:bg-[#1489BE]"
+                  className="w-full bg-primary hover:bg-[#B84500]"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

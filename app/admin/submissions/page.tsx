@@ -49,7 +49,7 @@ import Loading from "./loading"
 // Mock data for demonstration
 const mockSubmissions = [
   {
-    id: "SV-M1A2B3C4",
+    id: "LL-M1A2B3C4",
     facilityName: "Columbus Family Practice",
     submittedAt: "2026-01-19T14:30:00Z",
     status: "pending" as SubmissionStatus,
@@ -59,7 +59,7 @@ const mockSubmissions = [
     source: "public",
   },
   {
-    id: "SV-N5O6P7Q8",
+    id: "LL-N5O6P7Q8",
     facilityName: "Central Ohio Behavioral Health",
     submittedAt: "2026-01-18T09:15:00Z",
     status: "in-review" as SubmissionStatus,
@@ -69,7 +69,7 @@ const mockSubmissions = [
     source: "portal",
   },
   {
-    id: "SV-R9S0T1U2",
+    id: "LL-R9S0T1U2",
     facilityName: "Louisville Medical Group",
     submittedAt: "2026-01-17T16:45:00Z",
     status: "activated" as SubmissionStatus,
@@ -79,7 +79,7 @@ const mockSubmissions = [
     source: "public",
   },
   {
-    id: "SV-V3W4X5Y6",
+    id: "LL-V3W4X5Y6",
     facilityName: "Indianapolis Urgent Care",
     submittedAt: "2026-01-16T11:00:00Z",
     status: "pending" as SubmissionStatus,
@@ -89,7 +89,7 @@ const mockSubmissions = [
     source: "portal",
   },
   {
-    id: "SV-Z7A8B9C0",
+    id: "LL-Z7A8B9C0",
     facilityName: "Dayton Recovery Center",
     submittedAt: "2026-01-15T08:30:00Z",
     status: "in-review" as SubmissionStatus,
