@@ -183,7 +183,7 @@ export function Header() {
               <Link href="/for-providers/new-client-onboarding">Start Onboarding</Link>
             </Button>
             <Button asChild className="bg-[#D35400] text-white hover:bg-[#B84500]">
-              <Link href="/portal">Provider Portal</Link>
+              <a href="https://revdx.atcemr.com/login" target="_blank" rel="noopener noreferrer">Provider Portal</a>
             </Button>
           </div>
 
