@@ -104,7 +104,7 @@ export default function HomePage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="flex flex-col justify-center">
               <Badge className="mb-6 w-fit bg-white/20 text-white hover:bg-white/30 border-0">
-                Plain City, Ohio
+                Plain City, OH
               </Badge>
               <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 CAP-Accredited Clinical Reference Laboratory
@@ -133,11 +133,11 @@ export default function HomePage() {
                 </Link>
                 <span className="text-white/40">|</span>
                 <a
-                  href="tel:+16145551234"
+                  href="tel:+16145053748"
                   className="flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white"
                 >
                   <Phone className="size-4" />
-                  (614) 555-1234
+                  (614) 505-3748
                 </a>
               </div>
             </div>

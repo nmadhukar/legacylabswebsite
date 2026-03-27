@@ -45,11 +45,11 @@ export function Footer() {
             <div className="mt-6 space-y-3">
               <div className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                <span>Plain City, Ohio</span>
+                <span>8628 Industrial Parkway, Unit E, Plain City, OH 43064</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="size-4 shrink-0 text-primary" />
-                <span>(XXX) XXX-XXXX</span>
+                <span>(614) 505-3748</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="size-4 shrink-0 text-primary" />

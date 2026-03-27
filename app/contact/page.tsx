@@ -104,7 +104,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground">Location</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Plain City, Ohio
+                      8628 Industrial Parkway, Unit E, Plain City, OH 43064
                     </p>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground">Phone</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      (XXX) XXX-XXXX
+                      (614) 505-3748
                     </p>
                   </div>
                 </div>

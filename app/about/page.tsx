@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: "About",
-  description: "About Legacy Labs - CAP-accredited clinical reference laboratory based in Plain City, Ohio.",
+  description: "About Legacy Labs - CAP-accredited clinical reference laboratory based in Plain City, OH.",
 }
 
 const values = [
@@ -73,9 +73,9 @@ export default function AboutPage() {
                     <div className="mb-6 flex size-14 items-center justify-center rounded-xl bg-primary/10">
                       <MapPin className="size-7 text-primary" />
                     </div>
-                    <h2 className="text-2xl font-bold text-foreground">Plain City, Ohio</h2>
+                    <h2 className="text-2xl font-bold text-foreground">Plain City, OH</h2>
                     <p className="mt-3 text-muted-foreground">
-                      Our laboratory is based in Plain City, Ohio, serving healthcare providers 
+                      Our laboratory is based in Plain City, OH, serving healthcare providers 
                       and institutional partners across the region.
                     </p>
                   </div>
