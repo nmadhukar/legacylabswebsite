@@ -133,11 +133,11 @@ export default function HomePage() {
                 </Link>
                 <span className="text-white/40">|</span>
                 <a
-                  href="tel:+16145053748"
+                  href="tel:+19374218867"
                   className="flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white"
                 >
                   <Phone className="size-4" />
-                  (614) 505-3748
+                  (937) 421-8867
                 </a>
               </div>
             </div>

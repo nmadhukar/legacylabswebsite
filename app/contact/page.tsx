@@ -116,7 +116,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground">Phone</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      (614) 505-3748
+                      (937) 421-8867
                     </p>
                   </div>
                 </div>

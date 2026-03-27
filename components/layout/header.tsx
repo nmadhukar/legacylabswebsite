@@ -57,9 +57,9 @@ export function Header() {
       <div className="bg-[#3E2723] text-white">
         <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-sm sm:px-6 lg:px-8">
           <div className="hidden items-center gap-6 md:flex">
-            <a href="tel:+16145053748" className="flex items-center gap-2 transition-colors hover:text-[#F39C12]">
+            <a href="tel:+19374218867" className="flex items-center gap-2 transition-colors hover:text-[#F39C12]">
               <Phone className="size-3.5" />
-              <span>(614) 505-3748</span>
+              <span>(937) 421-8867</span>
             </a>
             <a href="mailto:info@legacyclinicallabs.com" className="flex items-center gap-2 transition-colors hover:text-[#F39C12]">
               <Mail className="size-3.5" />
@@ -242,9 +242,9 @@ export function Header() {
                 </div>
                 {/* Mobile Contact Info */}
                 <div className="mt-6 border-t border-border pt-6 text-sm text-[#4B5563]">
-                  <a href="tel:+16145053748" className="mb-2 flex items-center gap-2">
+                  <a href="tel:+19374218867" className="mb-2 flex items-center gap-2">
                     <Phone className="size-4 text-[#D35400]" />
-                    (614) 505-3748
+                    (937) 421-8867
                   </a>
                   <a href="mailto:info@legacyclinicallabs.com" className="flex items-center gap-2">
                     <Mail className="size-4 text-[#D35400]" />
