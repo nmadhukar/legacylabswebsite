@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // SSL/TLS
   auth: {
-    user: process.env.SMTP_USER || "coolify@dsiginc.com",
-    pass: process.env.SMTP_PASS || "5131P@stroad!",
+    user: process.env.SMTP_USER || "",
+    pass: process.env.SMTP_PASS || "",
   },
 })
 
